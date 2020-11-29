@@ -1,0 +1,231 @@
+% !TEX program = xelatex
+
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[czech]{babel}
+\usepackage[top = 1.5cm, bottom = 1.5cm, left = 2cm, right = 2cm]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{letltxmacro}
+\usepackage{wrapfig}
+\usepackage{bbm}
+
+
+% import obrázků z Inkscape
+% podle návodu na https://castel.dev/post/lecture-notes-2/
+\usepackage{import}
+\usepackage{xifthen}
+\usepackage{pdfpages}
+\usepackage{transparent}
+
+\newcommand{\incfig}[1]{%
+    \def\svgwidth{\columnwidth}
+    \import{./}{#1.pdf_tex}
+}
+
+
+\LetLtxMacro{\oldhbar}{\hbar}
+\renewcommand*{\hbar}{{\mathpalette\hbaraux\relax\mathrm{h}}}
+\newcommand*{\hbaraux}[2]{\sbox0{\mathsurround=0pt$#1\mathchar'26$}\mkern-1mu\lower.07\ht0\box0\mkern-8mu}
+
+\def\ph{\phantom}
+\def\vph{\vphantom}
+\def\hph{\hphantom}
+\def\rzw{\mathrlap}
+\def\lzw{\mathllap}
+\def\czw{\mathclap}
+
+\newcommand{\comm}[2]{\left[ #1, #2 \right]}
+\newcommand{\const}[1]{\text{#1}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\innerprod}[2]{\big< #1, #2 \big>}
+\newcommand{\mean}[1]{\big< #1 \big>}
+\renewcommand{\d}[1]{\;\const{d}#1}
+\newcommand{\dd}[2]{\frac{\const{d} #1}{\const{d} #2} \;}
+\newcommand{\pd}[2]{\frac{\partial  #1}{\partial  #2} \;}
+\newcommand{\e}[1]{\const{e}^{#1}}
+\renewcommand{\i}{\const{i}}
+\newcommand{\bhat}[1]{\hat{\bm{#1}}}
+\newcommand{\vechat}[1]{\hat{\vec{#1}}}
+\renewcommand{\dot}[1]{\accentset{\bullet}{#1}}
+\newcommand{\Tr}{\operatorname{Tr}}
+\newcommand{\bra}[1]{\left< #1 \right|}
+\newcommand{\ket}[1]{\left| #1 \right>}
+\newcommand{\braket}[2]{\left< #1 \middle| #2 \right>}
+\newcommand{\f}{\varphi}
+\newcommand{\Parity}{\hat{\mathcal{P}}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+
+\newcommand{\mat}[1]{
+    \begin{pmatrix}
+        #1
+    \end{pmatrix}
+}
+
+\newcommand{\mata}[2]{
+    \left(
+    \begin{array}{@{}#1@{}}
+        #2
+    \end{array}
+    \right)
+}
+
+\newcommand{\smat}[2][1]{
+    \scalebox{#1}{$\mat{#2}$}
+}
+
+\begin{document}
+
+\section*{Úkol 3: Provázání dvou qubitů}
+\textbf{Autor: Michal Grňo}
+
+\subsection*{Zadání}
+Máme dvouhladinový systém odpovídající qubitu $\mathcal H = \C^2 = \operatorname{span} \{ \ket{0}, \ket{1} \}$. Na tomto prostoru máme operátory
+\begin{align*}
+    \hat I & = \smat[0.9]{1 \\& 1} \: , &
+    \hat h &= \smat[0.9]{0 \\& \epsilon} \: , &
+    \hat \sigma_x &= \smat[0.9]{ & 1 \\ 1 } \: , &
+    \hat \sigma_y &= \smat[0.9]{ &\!\!-\i \\ \i } \: .
+\end{align*}
+Bude nás zajímat systém dvou qubitů, mezi kterými nejprve neprobíhá žádná interakce; hamiltonián systému je
+\begin{align*}
+    \hat H_0 = \hat h \otimes \hat I + \hat I \otimes \hat h \: ,
+\end{align*}
+můžeme ale zapnout interakci s celkovým hamiltoniánem
+\begin{align*}
+    \hat H &= \hat H_0 + \hat V \: , &
+    \hat V = \hbar \omega (\hat \sigma_x \otimes \hat \sigma_y - \hat \sigma_y \otimes \hat \sigma_x) \: .
+\end{align*}
+Budeme uvažovat počáteční stav $\ket \psi = \ket 1 \otimes \ket 0$. Jak se bude tento stav vyvíjet při vypnuté interakci? Jak při zapnuté? Dále budeme uvažovat stav $\ket{\psi(T)}$ vytvořený tak, že jsme pro stav $\ket \psi$ na čas $T=\frac{\pi}{8\omega}$ zapneme interakci. Ukažte, že je tento stav provázaný. Jaké jsou pravděpodobnosti výsledků měření $\hat h \otimes \hat I$ a následně $\hat I \otimes \hat h$?
+
+\subsection*{Řešení}
+Na součinovém prostoru $\mathcal H \otimes \mathcal H$ budeme používat Kroneckerův součin matic:
+\begin{align*}
+    \hat H_0
+    = \hat h \otimes \hat I + \hat I \otimes \hat h
+    = \smat[0.9]{0 \\& \epsilon} \otimes \smat[0.9]{1\\&1}
+    + \smat[0.9]{1\\&1} \otimes \smat[0.9]{0 \\& \epsilon}
+    = \smat[0.9]{0\\&0\\&&\epsilon\\&&&\epsilon}
+    + \smat[0.9]{0\\&\epsilon\\&&0\\&&&\epsilon}
+    = \smat[0.9]{0\\&\epsilon\\&&\epsilon\\&&&2\epsilon} \: .
+\end{align*}
+\begin{align*}
+    \hat V
+    = \hbar \omega (\hat \sigma_x \otimes \hat \sigma_y - \hat \sigma_y \otimes \hat \sigma_x)
+    = \hbar \omega \smat[0.9]{&&& \!-\i \\&& \i \\& \!-\i \\ \i}
+    - \hbar \omega \smat[0.9]{&&& \!-\i \\&& \!-\i \\& \i \\ \i}
+    = \smat[0.9]{0 \\& 0 & 2\i\hbar\omega \\& \!-2\i\hbar\omega & 0 \\&&& 0} \: ,
+\end{align*}
+\begin{align*}
+    \hat H = \smat[0.9]{0 \\& \epsilon & 2\i\hbar\omega \\& \!-2\i\hbar\omega & \epsilon \\&&& 2\epsilon} \: .
+\end{align*}
+Matice hamiltoniánu $\hat H$ je diagonalizovatelná a blokově diagonální, její „prostřední“ blok diagonalizujeme snadno:
+\begin{align*}
+    \smat[0.9]{\epsilon & 2\i\hbar\omega \\ \!-2\i\hbar\omega & \epsilon}
+    \quad=\quad
+    \frac{1}{\sqrt{2}} \smat[0.9]{\!-\i & \i \\ 1 & 1} \quad
+    \smat[0.9]{\epsilon - 2\hbar\omega \\& \epsilon + 2\hbar\omega} \quad
+    \frac{1}{\sqrt{2}} \smat[0.9]{\i & 1 \\ \!-\i & 1}
+\end{align*}
+Evoluční matice pro vypnutou, resp. zapnutou interakci tedy budou
+\begin{align*}
+    \hat U_0(t) = \exp(\, -\i \, \frac{t}{\hbar} \, \hat H_0 \,)
+    &= \smat{1 \\& \e{\displaystyle -\i \varepsilon t} \\&& \e{\displaystyle -\i \varepsilon t} \\&&& \e{\displaystyle -\i 2\varepsilon t} } \: , &
+    \varepsilon &\coloneqq \frac{\epsilon}{\hbar} \: .
+\end{align*}
+\begin{gather*}
+    \hat U(t) = \exp(\, -\i \, \frac{t}{\hbar} \, \hat H \, )
+    = \frac{1}{\sqrt{2}} \smat[0.9]{1 \\& \!-\i & \i \\& 1 & 1 \\&&& 1} \quad
+    \smat{1 \\& \e{\displaystyle -\i (\varepsilon - 2\omega)t} \\&& \e{\displaystyle -\i (\varepsilon + 2\omega)t} \\&&& \e{\displaystyle -\i 2\varepsilon t}} \quad
+    \frac{1}{\sqrt{2}} \smat[0.9]{1 \\& \i & 1 \\& \!-\i & 1 \\&&& 1}
+\\
+    \hat U(t) = \smat{
+        \;1
+        \\& \e{\displaystyle -\i\varepsilon t} \cos 2\omega t & -\e{\displaystyle -\i\varepsilon t} \sin 2\omega t
+        \\& \e{\displaystyle -\i\varepsilon t} \sin 2\omega t & \ph{-}\e{\displaystyle -\i\varepsilon t} \cos 2\omega t
+        \\&&& \e{\displaystyle -\i 2\varepsilon t}\,
+    }
+\end{gather*}
+Nyní už se můžeme podívat na chování samotného stavu $\ket\psi$. V naší součinové bázi  ho představuje vektor
+\begin{align*}
+    \ket\psi
+    = \ket 1 \otimes \ket 0
+    = \smat[0.9]{0\\1} \otimes \smat[0.9]{1\\0}
+    = \smat[0.9]{0\\0\\1\\0}
+    \: .
+\end{align*}
+Protože je $\ket\psi$ stacionárním stavem bezinterakčního hamiltoniánu, jeho vývoj je triviální:
+\begin{align*}
+    \ket{ \psi_0(t) } = \hat U_0(t) \ket\psi = \e{\displaystyle -\i\varepsilon t} \ket\psi
+    \: .
+\end{align*}
+Oproti tomu se zapnutou interakcí je vývoj složitější:
+\begin{align*}
+    \ket{\psi(t)} = \hat U(t) \ket\psi
+    = \e{\displaystyle -\i\varepsilon t} \, \smat[0.9]{0\\\!-\sin 2\omega t\\\ph{\!-}\cos 2\omega t \\0}
+    = \e{\displaystyle -\i\varepsilon t} \big(
+        -\sin 2\omega t \, \ket{01} +
+        \cos 2\omega t \, \ket{10}
+    \big) \: .
+\end{align*}
+Specificky nás zajímá, co se stane, když interakci spustíme na $T=\frac{\pi}{8\omega}$ a poté ji vypneme. Potom bude stav
+\begin{align*}
+    \ket{\psi(T)} = \frac{ \e{\displaystyle -\i \varepsilon T} }{\sqrt{2}} \,
+    \smat[0.9]{0 \\ \!-1 \\ 1 \\ 0}
+    \: .
+\end{align*}
+To je (až na fázi) Bellův stav $\Psi^-$, tedy jeden z maximálně provázaných stavů dvou qubitů. Že se skutečně jedná o provázaný stav můžeme i dokázat. Provázaný stav je z definice takový stav složeného kvantového systému, který není tenzorovým součinem stavů jednotlivých podsystémů. Předpokládejme tedy, že náš stav \textit{je} součinovým stavem:
+\begin{align*}
+    \smat[0.9]{a\\b} \otimes \smat[0.9]{c\\d}
+    = \smat[0.9]{ac\\ad\\bc\\bd}
+    = \smat[0.9]{0 \\ \!-1 \\ 1 \\ 0}
+\end{align*}
+Z prostředních řádků $ad=-1$ a $bc=1$ dostáváme podmínku, že žádná z proměnných $a,b,c,d$ není nula. To je ovšem ve sporu s krajními řádky $ac=0$ a $bd=0$. Tudíž jsme dokázali, že stav $\ket{\psi(T)}$ musí být provázaným stavem.
+
+\bigskip
+
+Nakonec nás zajímají výsledky měření energie na jednotlivých qubitech. K tomu využijeme zhuštěnou notaci, kde redukci stavu $A$ na stav $B$ po naměření hodnoty $c$ budeme značit $A \stackrel{c}{\mapsto} B$.
+\begin{align*}
+    \frac{1}{\sqrt{2}} \, \big(-\ket{01} + \ket{10} \big)
+    & \quad\stackrel{0}{\mapsto}\quad
+    \frac{-1}{\sqrt{2}} \, \ket{01}
+    \quad\stackrel{0}{\mapsto}\quad 0
+    \\[5pt]
+    \frac{1}{\sqrt{2}} \, \big(-\ket{01} + \ket{10} \big)
+    & \quad\stackrel{0}{\mapsto}\quad
+    \frac{-1}{\sqrt{2}} \, \ket{01}
+    \quad\stackrel{\displaystyle \epsilon}{\mapsto}\quad
+    \frac{-1}{\sqrt{2}} \, \ket{01}
+    \\[5pt]
+    \frac{1}{\sqrt{2}} \, \big(-\ket{01} + \ket{10} \big)
+    & \quad\stackrel{\displaystyle \epsilon}{\mapsto}\quad
+    \frac{1}{\sqrt{2}} \, \ket{10}
+    \quad\stackrel{0}{\mapsto}\quad
+    \frac{1}{\sqrt{2}} \, \ket{10}
+    \\[5pt]
+    \frac{1}{\sqrt{2}} \, \big(-\ket{01} + \ket{10} \big)
+    & \quad\stackrel{\displaystyle \epsilon}{\mapsto}\quad
+    \frac{1}{\sqrt{2}} \, \ket{10}
+    \quad\stackrel{\displaystyle \epsilon}{\mapsto}\quad 0
+\end{align*}
+\begin{wrapfigure}{r}{5cm}
+    \vspace{-1\baselineskip}
+    \centering
+    \includegraphics[width=4cm]{kocka.png}
+    \caption{Kočka ve stavu $\ket{x+}$}
+\end{wrapfigure}
+Vidíme, že jediné energie, které můžeme naměřit, jsou $(\epsilon, 0)$ a $(0, \epsilon)$, obě s pravděpodobností $50\,\%$.
+
+
+
+\subsubsection*{Závěr}
+Jako omluvu za pozdní odevzdání přijměte obrázek.
+
+
+
+
+\end{document}
